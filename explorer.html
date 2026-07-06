@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RunST X v0.4 - Source Code</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,monospace;background:#0d1117;color:#c9d1d9}
+.header{background:#161b22;padding:10px 16px;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:10px}
+.header h1{color:#58a6ff;font-size:1em}
+.header .badge{background:#238636;color:#fff;padding:2px 8px;border-radius:12px;font-size:.7em}
+.container{max-width:1200px;margin:0 auto;padding:10px;display:flex;gap:10px;height:calc(100vh - 50px)}
+.sidebar{width:320px;overflow-y:auto;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:8px;flex-shrink:0}
+.sidebar h3{color:#8b949e;font-size:.75em;padding:6px 8px;text-transform:uppercase;letter-spacing:1px}
+.file-tree{list-style:none}
+.file-tree li{padding:4px 8px;cursor:pointer;border-radius:4px;font-size:.82em;display:flex;align-items:center;gap:6px}
+.file-tree li:hover{background:#21262d}
+.file-tree li.active{background:#1f6feb33;color:#58a6ff}
+.file-tree li.folder{font-weight:600;color:#58a6ff}
+.file-tree li.file{padding-left:24px;color:#c9d1d9}
+.file-tree li .icon{width:18px;text-align:center}
+.file-tree li .toggle{width:18px;text-align:center;color:#8b949e}
+.code-area{flex:1;overflow:hidden;background:#161b22;border:1px solid #30363d;border-radius:8px;display:flex;flex-direction:column}
+.code-header{background:#1c2128;padding:8px 14px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center}
+.code-header .path{color:#58a6ff;font-size:.85em}
+.code-header .actions{display:flex;gap:6px}
+.btn{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.75em}
+.btn:hover{background:#30363d}
+.btn-primary{background:#238636;border-color:#238636}
+.btn-primary:hover{background:#2ea043}
+.code-body{flex:1;overflow:auto;padding:0}
+.code-body pre{font-family:'Courier New',monospace;font-size:.82em;padding:12px 14px;color:#e6edf3;line-height:1.65;white-space:pre;min-height:100%}
+.code-body pre .ln{color:#484f58;user-select:none;display:inline-block;width:45px;margin-right:16px;text-align:right}
+.welcome{text-align:center;padding:60px 20px;color:#8b949e}
+.welcome .icon{font-size:3em;margin-bottom:15px}
+.welcome h2{color:#c9d1d9;margin-bottom:8px}
+@media(max-width:768px){.sidebar{width:240px}.sidebar h3{font-size:.7em}}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>📦 RunST X v0.4 <span class="badge">Deep Integration</span></h1>
+</div>
+<div class="container">
+<div class="sidebar">
+<h3>Repository Structure</h3>
+<ul class="file-tree" id="tree"></ul>
+</div>
+<div class="code-area">
+<div class="code-header">
+<span class="path" id="filePath">Select a file to view</span>
+<div class="actions">
+<button class="btn" id="copyBtn" onclick="copyCode()">📋 Copy</button>
+</div>
+</div>
+<div class="code-body" id="codeBody">
+<div class="welcome">
+<div class="icon">🖥️</div>
+<h2>RunST X v0.4 Source Code</h2>
+<p>Click a file in the sidebar to view its source code</p>
+<p style="margin-top:15px;font-size:.8em">45 files • 10 drivers • 22 commands • 16MB heap</p>
+</div>
+</div>
+</div>
+</div>
+<script>
+const COS='https://user-1258344928-1404345542.cos.ap-shanghai.myqcloud.com/runst-x-v0.4';
+const TREE={
+".cargo/config.toml":{icon:"⚙️"},
+"AUDIT_REPORT.md":{icon:"📋"},
+"AUDIT_REPORT_v0.4.md":{icon:"📋"},
+"Cargo.toml":{icon:"📦"},
+"README.md":{icon:"📖"},
+"build.sh":{icon:"🔨"},
+"bootloader/Cargo.toml":{icon:"📦"},
+"bootloader/src/main.rs":{icon:"🐑"},
+"kernel/Cargo.toml":{icon:"📦"},
+"kernel/build.rs":{icon:"🔨"},
+"kernel/src/main.rs":{icon:"🐑"},
+"kernel/src/console.rs":{icon:"💻"},
+"kernel/src/commands/mod.rs":{icon:"📦"},
+"kernel/src/commands/help.rs":{icon:"❓"},
+"kernel/src/commands/ver.rs":{icon:"🏷️"},
+"kernel/src/commands/date_cmd.rs":{icon:"📅"},
+"kernel/src/commands/cal.rs":{icon:"📆"},
+"kernel/src/commands/uptime.rs":{icon:"⏱️"},
+"kernel/src/commands/echo.rs":{icon:"🔊"},
+"kernel/src/commands/clear.rs":{icon:"🧹"},
+"kernel/src/commands/reboot.rs":{icon:"🔄"},
+"kernel/src/commands/shutdown.rs":{icon:"⏻"},
+"kernel/src/commands/ls.rs":{icon:"📁"},
+"kernel/src/commands/cat.rs":{icon:"📄"},
+"kernel/src/commands/mkdir.rs":{icon:"📂"},
+"kernel/src/commands/ps.rs":{icon:"👥"},
+"kernel/src/commands/kill_cmd.rs":{icon:"💀"},
+"kernel/src/commands/meminfo.rs":{icon:"💾"},
+"kernel/src/commands/env.rs":{icon:"🌍"},
+"kernel/src/commands/whoami.rs":{icon:"👤"},
+"kernel/src/commands/ifconfig.rs":{icon:"🌐"},
+"kernel/src/commands/ping.rs":{icon:"🏓"},
+"kernel/src/commands/net.rs":{icon:"🔌"},
+"kernel/src/commands/pcilist.rs":{icon:"🔧"},
+"kernel/src/commands/test.rs":{icon:"🧪"},
+"kernel/src/drivers/mod.rs":{icon:"📦"},
+"kernel/src/drivers/vga.rs":{icon:"🖥️"},
+"kernel/src/drivers/keyboard.rs":{icon:"⌨️"},
+"kernel/src/drivers/rtc.rs":{icon:"🕐"},
+"kernel/src/drivers/ahci.rs":{icon:"💿"},
+"kernel/src/drivers/fat32.rs":{icon:"📀"},
+"kernel/src/drivers/rtl8139.rs":{icon:"🌐"},
+"kernel/src/drivers/tcpip.rs":{icon:"🔗"},
+"kernel/src/drivers/memory.rs":{icon:"💾"},
+"kernel/src/drivers/process.rs":{icon:"👥"}
+};
+
+function buildTree(){
+  const ul=document.getElementById('tree');
+  const groups={};
+  for(let path in TREE){
+    const parts=path.split('/');
+    let current=ul;
+    for(let i=0;i<parts.length;i++){
+      const isLast=i===parts.length-1;
+      if(!isLast){
+        // Folder
+        let folder=current.querySelector('[data-folder="'+parts.slice(0,i+1).join('/')+'"]');
+        if(!folder){
+          folder=document.createElement('li');
+          folder.className='folder';
+          folder.dataset.folder=parts.slice(0,i+1).join('/');
+          folder.innerHTML='<span class="toggle">▶</span><span class="icon">📂</span>'+parts[i];
+          current.appendChild(folder);
+        }
+        current=folder;
+      }else{
+        // File
+        const li=document.createElement('li');
+        li.className='file';
+        li.dataset.path=path;
+        li.innerHTML='<span class="icon">'+TREE[path].icon+'</span>'+parts[i];
+        li.onclick=()=>loadFile(path,li);
+        current.appendChild(li);
+      }
+    }
+  }
+}
+
+async function loadFile(path,el){
+  // Highlight active
+  document.querySelectorAll('.file-tree li').forEach(l=>l.classList.remove('active'));
+  if(el)el.classList.add('active');
+  
+  document.getElementById('filePath').textContent=path;
+  document.getElementById('codeBody').innerHTML='<div style="padding:40px;text-align:center;color:#8b949e">Loading...</div>';
+  
+  try{
+    const resp=await fetch(COS+'/'+path);
+    const text=await resp.text();
+    const lines=text.split('\n');
+    let html='<pre>';
+    lines.forEach((line,i)=>{
+      html+='<span class="ln">'+(i+1)+'</span>'+escapeHtml(line)+'\n';
+    });
+    html+='</pre>';
+    document.getElementById('codeBody').innerHTML=html;
+  }catch(e){
+    document.getElementById('codeBody').innerHTML='<div style="padding:40px;text-align:center;color:#f85149">Error: '+e.message+'</div>';
+  }
+}
+
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function copyCode(){
+  const pre=document.querySelector('.code-body pre');
+  if(pre)navigator.clipboard.writeText(pre.textContent).then(()=>{
+    const btn=document.getElementById('copyBtn');
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>btn.textContent='📋 Copy',1500);
+  });
+}
+
+buildTree();
+</script>
+</body>
+</html>
