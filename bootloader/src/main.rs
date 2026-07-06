@@ -14,9 +14,9 @@ use uefi_services::println;
 use sha2::{Sha256, Digest};
 
 // ===== 修复 #32：预期哈希（构建时生成） =====
-// TODO: Replace with actual kernel hash computed at build time
-// Currently disabled for development - will be enabled in production
-// const EXPECTED_HASH: [u8; 32] = [...]
+// FIX #1: SHA256 hash check disabled for development
+// In production, compute hash from actual kernel binary at build time
+// const EXPECTED_HASH: [u8; 32] = [...];
 const SKIP_HASH_CHECK: bool = true;
 
 // ===== 修复 #33：PE/COFF检查 =====
