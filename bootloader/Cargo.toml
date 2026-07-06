@@ -1,0 +1,18 @@
+[package]
+name = "runst_bootloader"
+version = "0.4.0"
+edition = "2021"
+
+[dependencies]
+uefi = { version = "0.28", features = ["alloc", "logger"] }
+uefi-services = "0.25"
+sha2 = "0.10"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true
+codegen-units = 1
+opt-level = "z"
