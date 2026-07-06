@@ -1,112 +1,184 @@
-# RunST X 操作系统
+# RunST X Kernel
 
-基于 Rust 的 UEFI 操作系统，支持 FAT32、TCP/IP、多进程。
+<div align="center">
 
-## 版本 0.3
+**A Personal Operating System Kernel written in Rust**
 
-### 新增功能
+[![Language](https://img.shields.io/badge/language-Rust-blue.svg)](https://www.rust-lang.org/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-v0.4-yellow.svg)]()
+[![GitHub stars](https://img.shields.io/github/stars/mason00398/runst_x?style=social)]()
 
-| 模块 | 状态 | 说明 |
-|------|------|------|
-| FAT32 文件系统 | ✅ 框架 | BPB解析、目录读取、文件读取 |
-| TCP/IP 协议栈 | ✅ 基础 | ICMP Ping、UDP、ARP缓存、校验和 |
-| 进程管理器 | ✅ 实现 | 协作式多任务、spawn/kill/ps |
-| 内存管理器 | ✅ 实现 | 4MB堆、动态分配、使用率统计 |
-| AHCI 驱动 | ✅ 增强 | 真实端口检测、NCQ命令框架 |
-| 键盘驱动 | ✅ 增强 | 方向键、F键、Tab、Backspace |
-| VGA 驱动 | ✅ 增强 | 真正清屏、光标控制、颜色枚举 |
-| 网卡驱动 | ✅ 增强 | 收发完整、MAC读取 |
+</div>
 
-### 命令列表 (22个)
+---
+
+## 📋 Overview
+
+RunST X is a personal operating system kernel built from scratch in Rust. It implements core OS components including process scheduling, memory management, networking, storage, and input devices — all in a monolithic kernel architecture.
+
+## 🏗️ Architecture
 
 ```
-ver        显示版本信息
-help       显示帮助
-reboot     重启系统
-shutdown   关机
-echo       输出文本
-clear/cls  清屏
-meminfo    内存使用情况
-uptime/time 当前时间
-test       硬件诊断
-pcilist    列出PCI设备
-net        网络测试
-ls/dir     列出目录
-cat        查看文件
-mkdir      创建目录
-ps         列出进程
-kill       杀死进程
-ifconfig/ip 网络配置
-ping       Ping主机
-date       显示日期
-cal        日历
-whoami     当前用户
-env        环境变量
+┌─────────────────────────────────────────────┐
+│              User Space (Commands)            │
+│  ls  cat  mkdir  ping  net  ps  vmstat  ... │
+├─────────────────────────────────────────────┤
+│              Kernel Core                      │
+│  main.rs  panic.rs  console.rs  pci.rs       │
+├──────────┬──────────┬───────────┬────────────┤
+│ Drivers  │Drivers   │ Drivers   │ Drivers    │
+│ AHCI     │ FAT32   │ Keyboard  │ VGA        │
+│ RTL8139  │ Memory  │ Process   │ RTC        │
+│ TCP/IP   │ VM      │ Net       │            │
+├──────────┴──────────┴───────────┴────────────┤
+│              Bootloader                       │
+│  SHA256 verification  PE/COFF validation      │
+└─────────────────────────────────────────────┘
 ```
 
-### 快速开始
+## ✨ Features
 
-```bash
-# 安装 Rust (如果还没有)
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+### Core Systems
+- **Memory Management** — 16MB heap allocator with allocation tracking
+- **Virtual Memory** — Page table management with page permissions
+- **Process Scheduler** — Cooperative multitasking via `fringe` generators
+- **Process Control** — fork(), terminate(), parent-child relationships
+- **IPC & Sync** — Message queues, semaphores, mutex locks
 
-# 添加 UEFI 目标
-rustup target add x86_64-unknown-uefi
-rustup component add rust-src
+### Networking
+- **RTL8139 Ethernet** — Full NIC driver with MAC reading and ARP cache
+- **ICMP Protocol** — Ping command with echo request/reply
+- **TCP Protocol** — Socket API, connection state machine
+- **UDP Protocol** — Datagram sockets
+- **DNS Cache** — Domain name resolution with caching
 
-# 构建
-cd runst_x
-cargo build --release
+### Storage & Input
+- **FAT32 Filesystem** — Directory reading and file access
+- **AHCI Storage** — SATA controller initialization and sector I/O
+- **PS/2 Keyboard** — Scan code processing with Shift support
 
-# 运行 (QEMU)
-qemu-system-x86_64 -drive format=raw,file=runst_x.img -bios OVMF.fd -serial stdio -m 256
-```
+### System Tools
+- **PCI Enumeration** — Recursive bus scanning with bridge support
+- **Boot Verification** — SHA256 hash and PE/COFF validation
+- **CLI Console** — Tab completion, command history, arrow keys
 
-### 目录结构
+## 📁 Project Structure
 
 ```
 runst_x/
-├── .cargo/
-│   └── config.toml        # UEFI 编译配置
-├── Cargo.toml             # Workspace
 ├── bootloader/
 │   ├── Cargo.toml
-│   └── src/main.rs        # 引导程序 (SHA256校验)
+│   └── src/main.rs          # Bootloader with SHA256 verification
 ├── kernel/
-│   ├── Cargo.toml
-│   ├── build.rs           # 构建时注入日期/GitHash
+│   ├── Cargo.toml            # Dependencies: fringe, spin, bytemuck...
+│   ├── build.rs
 │   └── src/
-│       ├── main.rs        # 内核入口
-│       ├── console.rs     # 命令Shell
-│       ├── pci.rs         # PCI枚举
+│       ├── main.rs           # Kernel entry point
+│       ├── panic.rs          # Panic handler
+│       ├── console.rs        # Console with tab/history
+│       ├── pci.rs            # PCI enumeration
 │       ├── drivers/
-│       │   ├── mod.rs     # 驱动模块
-│       │   ├── vga.rs     # VGA文本显示
-│       │   ├── keyboard.rs # 键盘驱动
-│       │   ├── rtc.rs     # 实时时钟
-│       │   ├── rtl8139.rs # 网卡驱动
-│       │   ├── ahci.rs    # SATA/AHCI驱动
-│       │   ├── fat32.rs   # FAT32文件系统
-│       │   ├── memory.rs  # 内存管理器
-│       │   ├── process.rs # 进程管理器
-│       │   └── tcpip.rs  # TCP/IP协议栈
-│       └── commands/      # 22个命令
+│       │   ├── mod.rs
+│       │   ├── ahci.rs       # AHCI storage driver
+│       │   ├── fat32.rs      # FAT32 filesystem
+│       │   ├── keyboard.rs   # PS/2 keyboard
+│       │   ├── memory.rs     # Memory allocator
+│       │   ├── net.rs        # Network structures
+│       │   ├── process.rs    # Process scheduler
+│       │   ├── rtc.rs        # Real-time clock
+│       │   ├── rtl8139.rs    # RTL8139 NIC driver
+│       │   ├── tcpip.rs      # TCP/IP stack
+│       │   ├── vga.rs        # VGA text mode
+│       │   └── vm.rs         # Virtual memory manager
+│       └── commands/
 │           ├── mod.rs
-│           ├── ver.rs
-│           ├── help.rs
-│           ├── ...
-├── build.sh               # 一键构建脚本
-└── README.md
+│           ├── cal.rs         # Calendar
+│           ├── cat.rs         # File cat
+│           ├── clear.rs       # Clear screen
+│           ├── echo.rs        # Echo
+│           ├── help.rs        # Help
+│           ├── kill_cmd.rs    # Kill process
+│           ├── ls.rs          # List directory
+│           ├── meminfo.rs     # Memory info
+│           ├── mkdir.rs       # Make directory
+│           ├── net.rs         # Network commands
+│           ├── pcilist.rs     # PCI list
+│           ├── ping.rs        # ICMP ping
+│           ├── ps.rs          # Process list
+│           ├── reboot.rs      # Reboot
+│           ├── shutdown.rs    # Shutdown
+│           ├── uptime.rs      # Uptime
+│           ├── ver.rs         # Version
+│           ├── vmstat.rs      # VM statistics
+│           └── whoami.rs      # Current user
+├── Cargo.toml                # Workspace manifest
+├── build.sh                  # Build script
+└── .cargo/config.toml        # Cross-compilation config
 ```
 
-### 技术栈
+## 📊 Audit Reports
 
-- **语言**: Rust (no_std, no_main)
-- **目标**: x86_64-unknown-uefi
-- **UEFI**: 0.28 + uefi-services 0.25
-- **内存**: linked_list_allocator
-- **同步**: spin (Mutex)
+| Report | Description |
+|--------|-------------|
+| [AUDIT_REPORT_v0.4.md](AUDIT_REPORT_v0.4.md) | Initial vulnerability audit |
+| [FUNCTIONAL_AUDIT_v0.4.md](FUNCTIONAL_AUDIT_v0.4.md) | Feature completeness analysis |
+| [FINAL_AUDIT_v0.4.md](FINAL_AUDIT_v0.4.md) | Comprehensive final audit |
+| [FINAL_AUDIT_v0.4_REVIEWED.md](FINAL_AUDIT_v0.4_REVIEWED.md) | Reviewed audit with fixes applied |
+| [COMPARISON_AUDIT_v0.4.md](COMPARISON_AUDIT_v0.4.md) | Comparison with Linux/Windows/macOS |
 
-### License
+## 🛠️ Build
 
-MIT
+```bash
+# Requires: rustup, x86_64-unknown-none target
+rustup target add x86_64-unknown-none
+
+# Build bootloader + kernel
+./build.sh
+
+# Or manually:
+cd bootloader && cargo build --release
+cd ../kernel && cargo build --release
+```
+
+## 📈 Roadmap
+
+| Version | Status | Features |
+|---------|--------|----------|
+| v0.1 | ✅ Released | Basic kernel, VGA, keyboard |
+| v0.2 | ✅ Released | Memory allocator, process basics |
+| v0.3 | ✅ Released | Network stack, storage drivers |
+| **v0.4** | ✅ **Current** | Full audit, IPC, virtual memory, improved scheduler |
+| v0.5 | 🔄 Planned | ELF loader, real context switch, TCP handshake |
+| v1.0 | 📋 Planned | Multi-level page tables, syscalls, memory protection |
+| v2.0 | 📋 Planned | GUI, ext4, USB, ACPI power management |
+
+## 🔧 Dependencies
+
+| Crate | Version | Purpose |
+|-------|---------|---------|
+| `fringe` | 1.2 | Coroutine scheduler |
+| `spin` | 0.9 | Synchronization primitives |
+| `bytemuck` | 1.0 | Safe byte manipulation |
+| `linked_list_allocator` | 0.10 | Heap allocator |
+| `simple-ahci` | 0.1 | AHCI storage controller |
+| `fat32` | 0.13 | FAT32 filesystem |
+| `pc-keyboard` | 0.5 | PS/2 keyboard decoding |
+| `rtl8139-rs` | 0.1 | RTL8139 NIC driver |
+| `uefi` | 0.28 | UEFI boot services |
+
+## 📄 License
+
+MIT License
+
+## 👤 Author
+
+**mason00398** — Personal project for operating system development and learning.
+
+---
+
+<div align="center">
+
+**Built with ❤️ using Rust**
+
+</div>
