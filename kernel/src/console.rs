@@ -74,9 +74,8 @@ impl Shell {
                             // ANSI转义序列：方向键
                             if let Some('[') = read_char() {
                                 match read_char() {
-                                    Some('A') => { // 上箭头
-                            // 方向键产生的是 ESC [ A/B/C/D 序列
-                            // 可以在这里触发命令历史上下翻
+                                    Some('A') => { // 上箭头 (ESC [ A)
+                            // 方向键处理：可以在这里触发命令历史
                                         if self.history_index > 0 {
                                             self.history_index -= 1;
                                             self.input.clear();
@@ -84,7 +83,7 @@ impl Shell {
                                             self.vga.write_str(&format!("\rRunST X> {}", self.history[self.history_index]));
                                         }
                                     }
-                                    Some('B') => { // 下箭头
+                                    Some('B') => { // 下箭头 (ESC [ B)
                                         if self.history_index < self.history.len() - 1 {
                                             self.history_index += 1;
                                             self.input.clear();
