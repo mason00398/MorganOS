@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RunST X Kernel v0.4 - Zoluvia</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .badge {
+            display: inline-block;
+            background: #00d2ff;
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .card h2 {
+            font-size: 1.3em;
+            margin-bottom: 16px;
+            color: #00d2ff;
+        }
+        .card h3 {
+            font-size: 1em;
+            margin: 16px 0 8px 0;
+            color: #3a7bd5;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat {
+            background: rgba(0,210,255,0.1);
+            border: 1px solid rgba(0,210,255,0.2);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-num {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d2ff;
+        }
+        .stat-label {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 4px;
+        }
+        .file-list {
+            list-style: none;
+        }
+        .file-list li {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-list li:last-child { border-bottom: none; }
+        .file-list a {
+            color: #00d2ff;
+            text-decoration: none;
+        }
+        .file-list a:hover { text-decoration: underline; }
+        .file-size {
+            color: #666;
+            font-size: 0.85em;
+        }
+        .check { color: #4caf50; margin-right: 8px; }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            h1 { font-size: 1.8em; }
+        }
+        .toc {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .toc a {
+            color: #00d2ff;
+            text-decoration: none;
+            display: block;
+            padding: 4px 0;
+        }
+        .toc a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐧 RunST X Kernel<span class="badge">v0.4</span></h1>
+        <p class="subtitle">Rust-based OS Kernel for x86_64 UEFI | Zoluvia Platform</p>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-num">20</div>
+                <div class="stat-label">Files</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">48</div>
+                <div class="stat-label">Bugs Fixed</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">52</div>
+                <div class="stat-label">Checks Passed</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">100%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="card">
+            <h2>🔗 Quick Access</h2>
+            <a href="/runst_x/AUDIT_REPORT_v0.4.md" class="btn" style="margin-right:10px;margin-bottom:10px;">📋 Audit Report</a>
+            <a href="/runst_x/FUNCTIONAL_AUDIT_v0.4.md" class="btn" style="margin-right:10px;margin-bottom:10px;">🔍 Functional Audit</a>
+            <a href="/runst_x/FINAL_AUDIT_v0.4_REVIEWED.md" class="btn" style="margin-right:10px;margin-bottom:10px;">✅ Final Audit (Reviewed)</a>
+            <a href="https://zoluvia.com/" class="btn" style="margin-right:10px;margin-bottom:10px;">🏠 Home Page</a>
+            <a href="https://zoluvia.com/uploads/runst_x/" class="btn" style="margin-bottom:10px;">📁 Browse All Files</a>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="toc">
+            <strong>Contents:</strong>
+            <a href="#features">Features</a>
+            <a href="#architecture">Architecture</a>
+            <a href="#kernel-files">Kernel Files</a>
+            <a href="#bootloader">Bootloader</a>
+            <a href="#commands">Commands</a>
+            <a href="#drivers">Drivers</a>
+            <a href="#download">Download</a>
+        </div>
+
+        <div class="grid-2">
+            <!-- Features -->
+            <div class="card" id="features">
+                <h2>✨ Features</h2>
+                <ul style="padding-left:20px; line-height:2;">
+                    <li>✅ UEFI Boot Support</li>
+                    <li>✅ 16MB Heap Allocation</li>
+                    <li>✅ Fringe-based Scheduler</li>
+                    <li>✅ Memory Management</li>
+                    <li>✅ PCI Device Enumeration</li>
+                    <li>✅ AHCI Storage Driver</li>
+                    <li>✅ FAT32 Filesystem</li>
+                    <li>✅ RTL8139 Network</li>
+                    <li>✅ PS/2 Keyboard</li>
+                    <li>✅ TCP/IP Stack</li>
+                    <li>✅ VGA Text Display</li>
+                    <li>✅ Real-Time Clock</li>
+                </ul>
+            </div>
+
+            <!-- Commands -->
+            <div class="card" id="commands">
+                <h2>⌨️ Shell Commands</h2>
+                <ul style="padding-left:20px; line-height:2;">
+                    <li><code>help</code> - 帮助</li>
+                    <li><code>ver</code> - 版本</li>
+                    <li><code>uptime</code> - 运行时间</li>
+                    <li><code>ps</code> - 进程列表</li>
+                    <li><code>kill</code> - 终止进程</li>
+                    <li><code>ls</code> - 目录列表</li>
+                    <li><code>cat</code> - 查看文件</li>
+                    <li><code>mkdir</code> - 创建目录</li>
+                    <li><code>ping</code> - 网络测试</li>
+                    <li><code>net</code> - 网络状态</li>
+                    <li><code>ifconfig</code> - 网络配置</li>
+                    <li><code>pcilist</code> - PCI设备</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Architecture -->
+        <div class="card" id="architecture">
+            <h2>🏗️ Architecture</h2>
+            <pre style="background:rgba(0,0,0,0.3); padding:16px; border-radius:8px; overflow-x:auto; font-size:0.85em; line-height:1.6;">
+runst_x/
+├── bootloader/          ← UEFI boot loader with SHA256 verification
+│   ├── Cargo.toml
+│   └── src/main.rs
+├── kernel/              ← Main kernel source
+│   ├── Cargo.toml       ← Dependencies: simple-ahci, fat32, fringe, etc.
+│   ├── build.rs
+│   └── src/
+│       ├── main.rs      ← Kernel entry point, global driver instances
+│       ├── panic.rs     ← Custom panic handler
+│       ├── console.rs   ← Shell with history, tab completion, arrow keys
+│       ├── pci.rs       ← PCI enumeration with bridge support
+│       ├── drivers/     ← Hardware drivers
+│       │   ├── ahci.rs      ← Simple-AHCI storage
+│       │   ├── process.rs   ← Fringe-based preemptive scheduling
+│       │   ├── fat32.rs     ← FAT32 filesystem driver
+│       │   ├── rtl8139.rs   ← RTL8139 Ethernet with ARP cache
+│       │   ├── tcpip.rs     ← TCP/IP stack with ICMP
+│       │   ├── keyboard.rs  ← PS/2 keyboard (pc-keyboard crate)
+│       │   ├── memory.rs    ← 16MB heap allocator
+│       │   ├── net.rs       ← ARP resolution
+│       │   ├── vga.rs       ← VGA text buffer
+│       │   └── rtc.rs       ← Real-time clock
+│       └── commands/    ← Shell commands (20+ built-in)
+└── AUDIT_REPORT_v0.4.md ← Full audit report
+            </pre>
+        </div>
+
+        <!-- Kernel Files -->
+        <div class="card" id="kernel-files">
+            <h2>📦 Kernel Source Files</h2>
+            <ul class="file-list">
+                <li><span class="check">✅</span><a href="/runst_x/kernel/Cargo.toml">kernel/Cargo.toml</a> <span class="file-size">622B</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/main.rs">kernel/src/main.rs</a> <span class="file-size">3.7KB</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/panic.rs">kernel/src/panic.rs</a> <span class="file-size">552B</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/console.rs">kernel/src/console.rs</a> <span class="file-size">5.7KB</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/pci.rs">kernel/src/pci.rs</a> <span class="file-size">5.8KB</span></li>
+            </ul>
+        </div>
+
+        <!-- Drivers -->
+        <div class="card" id="drivers">
+            <h2>🔧 Drivers</h2>
+            <ul class="file-list">
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/drivers/ahci.rs">drivers/ahci.rs</a> <span class="file-size">2.1KB</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/drivers/process.rs">drivers/process.rs</a> <span class="file-size">4.6KB</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/drivers/fat32.rs">drivers/fat32.rs</a> <span class="file-size">6.6KB</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/drivers/rtl8139.rs">drivers/rtl8139.rs</a> <span class="file-size">6.2KB</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/drivers/tcpip.rs">drivers/tcpip.rs</a> <span class="file-size">2.0KB</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/drivers/keyboard.rs">drivers/keyboard.rs</a> <span class="file-size">1.9KB</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/drivers/memory.rs">drivers/memory.rs</a> <span class="file-size">1.8KB</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/kernel/src/drivers/net.rs">drivers/net.rs</a> <span class="file-size">411B</span></li>
+            </ul>
+        </div>
+
+        <!-- Bootloader -->
+        <div class="card" id="bootloader">
+            <h2>🚀 Bootloader</h2>
+            <ul class="file-list">
+                <li><span class="check">✅</span><a href="/runst_x/bootloader/Cargo.toml">bootloader/Cargo.toml</a> <span class="file-size">295B</span></li>
+                <li><span class="check">✅</span><a href="/runst_x/bootloader/src/main.rs">bootloader/src/main.rs</a> <span class="file-size">5.1KB</span></li>
+            </ul>
+            <h3>Security Features</h3>
+            <ul style="padding-left:20px; line-height:2;">
+                <li>✅ SHA256 kernel hash verification</li>
+                <li>✅ PE/COFF format validation</li>
+                <li>✅ UEFI Secure Boot compatible</li>
+            </ul>
+        </div>
+
+        <!-- Download -->
+        <div class="card" id="download">
+            <h2>📥 Download</h2>
+            <a href="/runst_x/" class="btn">📁 Browse All Files</a>
+            <a href="/runst_x/AUDIT_REPORT_v0.4.md" class="btn" style="background:linear-gradient(90deg,#4caf50,#2196f3); margin-left:10px;">📋 Audit Report</a>
+            <p style="margin-top:16px; color:#888; font-size:0.9em;">All files are publicly accessible. Direct download links available at /runst_x/</p>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align:center; color:#666; margin-top:40px; font-size:0.85em;">
+            <p>RunST X Kernel v0.4 | Built with Rust | © 2026 Zoluvia</p>
+            <p style="margin-top:8px;"><a href="https://zoluvia.com/" style="color:#00d2ff;">zoluvia.com</a></p>
+        </div>
+    </div>
+</body>
+</html>
