@@ -1,0 +1,28 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# OS images
+*.iso
+*.img
+*.bin
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+*.o
+*.ko
+*.elf
+
+# Logs
+*.log
+
+# OS specific
+.DS_Store
+Thumbs.db
