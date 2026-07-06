@@ -59,9 +59,7 @@ fn efi_main(_handle: Handle, mut st: SystemTable<Boot>) -> Status {
 // In no_std environments, fringe::OsStack uses alloc::alloc::alloc which
 // requires a global allocator. This works IF linked_list_allocator is
 // initialized BEFORE calling init_scheduler().
-// 
 // VERIFIED: ALLOCATOR is initialized at line ~50, init_scheduler() at line ~60
-// This ordering is correct.
     unsafe {
         let mm = drivers::memory::MemoryManager::new();
         mm.init(heap_start, heap_size);
@@ -104,7 +102,6 @@ fn efi_main(_handle: Handle, mut st: SystemTable<Boot>) -> Status {
     // FIX #4: After exit_boot_services(), ALL UEFI boot services become invalid.
 // This includes uefi_services::println! which relies on Console Out protocol.
 // All logging after this point MUST use VGA text buffer (0xB8000) directly.
-// 
 // WARNING: The following uefi_services::println! call is a BUG:
 // uefi_services::println!("Exiting Boot Services...");
 // It may work on QEMU but will crash on real hardware.
