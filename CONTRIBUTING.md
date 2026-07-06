@@ -1,6 +1,6 @@
-# Contributing to RunST X
+# Contributing to MorganOS
 
-Thank you for your interest in contributing to RunST X!
+Thank you for your interest in contributing to MorganOS!
 
 ## Getting Started
 
@@ -12,8 +12,8 @@ Thank you for your interest in contributing to RunST X!
 ### Setup
 ```bash
 # Clone the repository
-git clone https://github.com/mason00398/runst_x.git
-cd runst_x
+git clone https://github.com/mason00398/MorganOS.git
+cd MorganOS
 
 # Install cross-compilation target
 rustup target add x86_64-unknown-none
